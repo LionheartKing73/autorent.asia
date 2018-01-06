@@ -1,0 +1,6 @@
+<?php
+$serverhost = "127.0.0.1";
+$serveruser = "diamondcarrental";
+$serverpwd  = "Premier302";
+$dbname     = "diamondcarrental";
+?>

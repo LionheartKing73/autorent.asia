@@ -1,0 +1,135 @@
+/****************** GENERAL ELEMENTS **********************/
+body {
+  margin:0px 0px 0px 0px;
+  padding:0px;
+  background:#eee;
+}
+
+table{
+  border-collapse:collapse;
+  background-color:#cdcee0;
+  border:1px solid #000;
+}
+
+a  { text-decoration:none; }
+tr { background-color: #cdcee0; }
+tr.odd { background-color: #bdbee0; }
+tr.hov { background-color: #eee; }
+
+th {
+  background-color:#ddd;
+  padding:5px;
+  border: 1px dotted #003366;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  font-size:12px;
+  letter-spacing: 3px;
+  text-align:left;
+}
+
+td {
+  font-family: "Courier New", Courier, mono;
+  font-size: 12px;
+  color: #036;
+  padding-left: 4px;
+  border: 1px dotted #003366;
+}
+
+button { font-size:9px; letter-spacing: 1px; }
+
+/****************** MAIN PANEL **********************/
+#main {
+  width:600px;
+  background:#fff;
+  margin:auto;
+  margin-top:10px;
+}
+
+#main table {
+  width:100%;
+}
+
+#main th {
+  text-align:center;
+}
+
+/**************** NAVIGATION PANEL ********************/
+#navigation {
+  width:600px;
+  margin:auto;
+  margin-top:10px;
+}
+
+table#navi {
+  text-align: right;
+}
+
+table#navi td{
+    padding:3px;
+    text-align:center;
+    width:20px;
+    background-color:#cdcee0;
+}
+
+table#navi td#first{
+    text-align:left;
+    width:100px;
+}
+
+table#navi td#naviact{
+    font-weight: bold;
+}
+
+/**************** FILTER PANEL ********************/
+#filter {
+  width:400px;
+  background:#fff;
+  margin:auto;
+  margin-top:50px;
+}
+
+#filter table {
+  width:100%;
+}
+
+#filter th {
+  text-align:center;
+}
+
+#filter button {
+  font-size:14px;
+}
+
+/******************** OTHERS ***********************/
+#insertblock {
+  margin:auto;
+  padding-top:50px;
+  width:400px;
+}
+
+#insertblock table {
+  width:100%;
+}
+.tablefooter {
+  padding-top:10px;
+  text-align:center;
+}
+.tableheader {
+  padding:10px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.navbutton {
+  width:33%;
+  float:left;
+}
+
+
+img {
+ border:0px;
+}
+
+.btn {
+  text-align:center;
+}

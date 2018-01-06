@@ -1,0 +1,245 @@
+<?php
+include './Includes/Top.php';
+include './Includes/mode.php';
+include './Includes/booking_costsv2.php';
+?>
+<html>
+<head>
+<title>Database Administration</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<?php
+include './Includes/Head.php';
+
+
+   /* 
+   $Sql = "update locations set location_order = 77 where locationid = 24";
+$ResultSet = mysql_query( $Sql );
+ 
+ 
+ $Sql = "delete from vehicles where  vehicleid = 75";
+$ResultSet = mysql_query( $Sql );
+$Sql = "select count(*) from supplier";
+$ResultSet = mysql_query( $Sql );
+$Row = mysql_fetch_array($ResultSet) ;    
+
+var_dump( $Row) ; 
+
+    */
+$Type  = $_REQUEST['Type'];
+$For  = $_REQUEST['For'];
+$ID = $_REQUEST['ID'];
+if ( is_numeric($ID )) 
+{
+	$Mode = "Edit";
+	$Sql = "SELECT bookings.*, currencies.*, partner.*, vehicles.*, supplier.*, l1.location_name fromloc, l2.location_name toloc FROM bookings LEFT OUTER JOIN partner_visit on bookings.partner_visit_id = partner_visit.partner_visit_id ";
+$Sql .= " LEFT OUTER JOIN partner on partner.partner_id = partner_visit.fk_visit_partner_id ";
+$Sql .= " JOIN vehicles ON bookings.vehicleid = vehicles.vehicleid ";
+$Sql .= " LEFT OUTER JOIN currencies on currencies_id = bookings.fk_booking_currencies_id ";
+$Sql .= " LEFT JOIN supplier ON vehicles.supplierid = supplier.supplierid ";  
+$Sql .= " LEFT JOIN locations l1 ON l1.location_code = bookings.pickup ";  
+$Sql .= " LEFT JOIN locations l2 ON l2.location_code = bookings.dropoff ";  
+$Sql .= " WHERE bookings.bookingsid = $ID order by bookingsid desc";
+$ResultSet = mysql_query( $Sql ) 
+	or die ( "Failed in House Query" .mysql_error());
+	$Row = mysql_fetch_array($ResultSet) ;
+
+}
+Else
+	exit;
+
+?>
+
+
+</head>
+
+<?php
+include './Includes/BodyHead.php';
+
+$yesno[ 0 ] = "No";
+$yesno[ 1 ] = "Yes";  
+?>
+
+<h1>Booking</h1>
+
+<table width=550px align=center cellpadding=2  border=0>
+<tr><td class='header' align='right'>Id</td><td><?php echo $Row["bookingsid"]?></td></tr>
+<tr><td align='right'>Partner</td><td><?php echo $Row["partner_name"]?></td></tr>    
+<tr><td align='right'>Model</td><td><?php echo $Row["manufacturer"]." ".$Row["model"]?></td></tr>
+<tr><td align='right'>Supplier</td><td><?php echo $Row["supplier_name"]?></td></tr>       
+<tr><td align='right'>Booker</td><td><?php echo $Row["name"]?></td></tr>
+<tr><td align='right'>Pickup</td><td><?php echo $Row["fromloc"]?></td></tr>
+<tr><td align='right'>Pickup Time</td><td><?php echo $Row["pickupdate"]." ".$Row["pickuptime"]?></td></tr>
+<tr><td align='right'>Dropoff</td><td><?php echo $Row["toloc"]?></td></tr>
+<tr><td align='right'>Dropoff Time</td><td><?php echo $Row["dropoffdate"]." ".$Row["dropofftime"]?></td>
+</tr>
+<?php
+    // No calc no of days
+    $bc = new BookingCosts( 0 );
+    
+$bc->OptWaiver = $Row["opt_insurance_waiver"];
+$bc->OptAccident = $Row["opt_insurance_accident"];
+$bc->OptGpsTh = $Row["opt_gps_thai"];
+$bc->OptGpsEn = $Row["opt_gps_english"];
+
+if ( $Row["opt_child_seat"] == 2)
+{
+  $bc->OptChildSeat = 1;
+  $bc->OptChildSeat2 = 1;  
+}
+elseif ( $Row["opt_child_seat"] == 1)
+  $bc->OptChildSeat = 1;
+
+    $StDateArr = explode( "-", $Row["pickupdate"]);
+    $StTimeArr = explode( "-", $Row["pickuptime"]);
+     $EnDateArr = explode( "-", $Row["dropoffdate"]);
+    $EnTimeArr = explode( "-", $Row["dropofftime"]);   
+
+    $recalc_price = $bc->CalcRegionalPrice( $Row["locationid"], $StDateArr[2],$StDateArr[1],$StDateArr[0],$StTimeArr[0],$StTimeArr[1],$EnDateArr[2],$EnDateArr[1],$EnDateArr[0],$EnTimeArr[0],$EnTimeArr[1], $Row["vehicleid"]);
+
+    
+?>
+<tr><td align='right'>Days</td><td><?php echo $bc->NumDays?></td></tr>
+<tr><td align='right'>Phone</td><td><?php echo $Row["phone"]?></td></tr>
+<tr><td align='right'>Mobile</td><td><?php echo $Row["mobile"]?></td></tr>   
+<tr><td align='right'>Local Phone</td><td><?php echo $Row["local_phone"]?></td></tr>  
+<tr><td align='right'>Email</td><td><?php echo $Row["email"]?></td></tr>
+<tr><td align='right'>Alt Email</td><td><?php echo $Row["alt_email"]?></td></tr> 
+<!--<tr><td align='right'>Passport/Id</td><td><?php echo $Row["passport"]?></td></tr>-->
+<tr><td align='right'>Address</td><td><?php echo $Row["address"]?></td></tr>
+<tr><td align='right'>Address</td><td><?php echo $Row["address2"]?></td></tr>  
+<tr><td align='right'>City</td><td><?php echo $Row["city"]?></td></tr>
+<tr><td align='right'>Country</td><td><?php echo $Row["country"]?></td></tr>
+<tr><td align='right'>Zip</td><td><?php echo $Row["zip"]?></td></tr>
+<tr><td align='right'>Delivery Address</td><td><?php echo $Row["delivery_address"]?></td></tr>
+<tr><td align='right'>Delivery Address 2</td><td><?php echo $Row["delivery_address2"]?></td></tr>  
+<tr><td align='right'>Driver Age</td><td><?php echo $Row["driver_age"]?></td></tr>  
+<tr><td align='right'>Additional Drivers</td><td><?php echo $Row["additional_drivers"]?></td></tr> 
+<tr><td align='right'>Optional Waiver Insurance</td><td><?php echo $yesno[ $Row["opt_insurance_waiver"] ]?></td></tr> 
+<?php
+    if ( $Row["opt_insurance_waiver"] )
+    {
+?> 
+<tr><td align='right'>Optional Waiver Cost</td><td><?php echo number_format( $bc->Insurance,2)?></td></tr>  
+<?php
+}
+?>
+<tr><td align='right'>Optional Accident Insurance</td><td><?php echo $yesno[ $Row["opt_insurance_accident"] ]?></td></tr>
+<?php
+    if ( $Row["opt_insurance_accident"] )
+    {
+?>
+<tr><td align='right'>Optional Accident Cost</td><td><?php echo number_format( $bc->OptAccidentCost,2)?></td></tr>   
+<?php
+}
+?>
+<tr><td align='right'>Child Seats</td><td><?php echo $Row["opt_child_seat"]?></td></tr>  
+<?php
+    if ( $Row["opt_child_seat"] )
+    {
+      $ChildCosts = $bc->OptChildSeatCost * $bc->ChildSeats;  
+?>
+<tr><td align='right'>Child Seat Total Cost</td><td><?php echo number_format( $ChildCosts,2)?></td></tr>   
+<?php
+}
+?>
+<tr><td align='right'>Thai GPS</td><td><?php echo $yesno[ $Row["opt_gps_thai"] ]?></td></tr>  
+<?php
+    if ( $Row["opt_gps_thai"] )
+    {
+?>
+<tr><td align='right'>Thai GPS cost</td><td><?php echo number_format( $bc->OptGpsThCost,2)?></td></tr>  
+<?php
+}
+?>
+<tr><td align='right'>English GPS</td><td><?php echo $yesno[ $Row["opt_gps_english"] ]?></td></tr>  
+<?php
+    if ( $Row["opt_gps_english"] )
+    {
+?>
+<tr><td align='right'>English GPS</td><td><?php echo number_format( $bc->OptGpsEnCost,2)?></td></tr>  
+<?php
+}
+?>  
+<tr><td align='right'>Optional Extras Total</td><td><?php echo number_format( $bc->Extras,2)?></td></tr> 
+
+
+<?php
+$sql = "select * from booking_extras be " .
+    " JOIN pricing_extras pe ON pe.pricing_extras_id = be.fk_booking_pricing_extras_id " .
+    " JOIN pricing_extra_type pet ON " .
+    " pet.pricing_extra_type_id = pe.fk_extras_pricing_extra_type_id " .
+    " WHERE be.fk_extras_booking_id = ".$Row["bookingsid"] .
+    " ORDER by display_order ";
+    
+    
+    $ResultSet = mysql_query( $sql ) 
+        or die ( "Failed in Pricing Scheme Query" .mysql_error());
+
+    $xHTML = "<table width='550px'>";
+    $xHTML .= "<tr><th>Extra</th><th align='right'>Rate</th><th align='right'>COST</th></tr>";
+    while ($Row2 = mysql_fetch_array($ResultSet) ) {
+        
+        $xHTML .=  "<tr><td align='left'>" ;
+        $text = str_replace( "PARAM1", $Row2["extras_param1"], $Row2["extras_booking_output"]);
+        $text = str_replace( "PARAM2", $Row2["extras_param2"], $text); 
+        $text = str_replace( "PARAM3", $Row2["extras_param3"], $text); 
+        $xHTML .=  $text."</td>";
+        $xHTML .=  "<td align='right'>".number_format( $Row2["rate"],2)."</td>";
+        $xHTML .=  "<td align='right'>".number_format($Row2["price"],2)."</td>";  
+        $xHTML .=  "</tr>";  
+        $ExtrasCost = $ExtrasCost + $Row2["price"];
+    }
+    $xHTML .=  "</table>";
+?>
+
+
+
+<tr><td align='right'>Flight</td><td><?php echo $Row["flight"]?></td></tr>
+<tr><td align='right'>Promo Code</td><td><?php echo $Row["promocode"]?></td></tr>
+<tr><td align='right'>Newsletter</td><td><?php echo $Row["mailings"]?></td></tr>
+<tr><td align='right'>Comments</td><td><?php echo $Row["comments"]?></td>
+</tr>
+<?php
+    $pt_arr[1] = "Credit Card";
+    $pt_arr[2] = "PayPal";
+?>
+<tr><td align='right'>Payment Type</td><td><?php echo $pt_arr[ $Row["payment_type_id"] ]?></td></tr>
+
+<tr><td align='right'>Credit Card Type</td><td><?php echo $Row["cardtype"]?></td></tr>
+<tr><td align='right'>Credit Card Number</td><td><?php echo $Row["cardnumber"]?></td></tr>
+<tr><td align='right'>Credit Card Expiry</td><td><?php echo $Row["cardexpiry"]?></td></tr>
+
+
+<tr><td align='right'>Price Quoted</td><td align='right'><?php echo number_format( $Row["calcprice"],2 ) ?></td></tr>
+<?php
+    if ( ! $Row["currency_name"])
+        $CCy = "Thai Baht";
+    else
+        $CCy = $Row["currency_name"];
+?>
+<tr><td align='right'>Currency</td><td ><?php echo $CCy ?></td></tr>
+<?php
+ $deposit = $Row["calcprice"] - $Row["balance_payment"];   
+    
+?>
+<tr><td align='right'>Deposit</td><td align='right'><?php echo number_format( $deposit, 2) ?></td></tr>    
+<tr><td align='right'>Balance Due (excluding Extras)</td><td align='right'><?php echo number_format( $Row["balance_payment"],2 ) ?></td></tr>  
+<tr><td align='right'>Recalc Price</td><td align='right'><?php echo number_format($recalc_price,2 ) ?></td></tr> 
+<?php
+$recalc_deposit =  $recalc_price - $bc->BookingBalance;
+?>
+<tr><td align='right'>Recalc Deposit</td><td align='right'><?php echo number_format( $recalc_deposit, 2) ?></td></tr>    
+<tr><td align='right'>Recalc Balance Due (excluding Extras)</td><td align='right'><?php echo number_format( $bc->BookingBalance,2 ) ?></td></tr>    
+
+<tr><td align='right'>EXTRAS</td><td align='right'><?php echo number_format(  $ExtrasCost,2 ) ?></td></tr>   
+<tr><td align='right'>BALANCE INCLUDING EXTRAS</td><td align='right'><?php echo number_format( $bc->BookingBalance + $ExtrasCost,2 ) ?></td></tr>   
+</table>
+
+<h2>Optionals</h2>
+
+<?php
+print $xHTML;
+
+
+include './Includes/BodyFoot.php';
+?>

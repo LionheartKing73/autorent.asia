@@ -1,0 +1,1 @@
+<div id='RightCol' style='display: block;width: 620px;  float: right;'>     

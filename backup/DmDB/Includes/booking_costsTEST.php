@@ -1,0 +1,20 @@
+<?php
+
+
+// We have the start date and the end date
+// we need to work out how many days are there in which date range
+		$time1 = mktime( 15, 0, 0, 11, 1, 2016 );
+		$time2 = mktime( 15, 0, 0, 11, 8, 2016 );
+$rundate = $time1;
+$days=0;
+while ( $rundate < $this->time2 )
+{
+
+
+	$days=$days+1;
+	$rundate = $rundate + ( 60 * 60 * 24 );
+}
+
+print $rundate;
+
+ ?>
